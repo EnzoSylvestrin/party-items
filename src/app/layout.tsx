@@ -5,7 +5,7 @@ import "./styles/globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Items da festa",
+  title: "Itens da festa",
   description: "Feito para todo mundo poder adicionar sua preferencia de item para a festa",
 };
 

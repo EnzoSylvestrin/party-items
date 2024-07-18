@@ -1,5 +1,5 @@
+import prisma from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '../../../../../lib/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: any }) {
     const { menuId } = params;

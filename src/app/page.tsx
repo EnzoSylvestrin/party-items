@@ -1,10 +1,5 @@
-import { prisma } from '../lib/prisma';
 import ToggleBar from '../components/ToogleBar';
-
-export async function getMenus() {
-  const menus = await prisma.menu.findMany();
-  return menus;
-}
+import { getMenus } from './getMenus';
 
 export default async function Home() {
   const menus : any = await getMenus();

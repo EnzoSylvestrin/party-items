@@ -1,20 +1,13 @@
 import ToggleBar from '@/components/ToogleBar';
-import { prisma } from '../../../lib/prisma';
 import { getMenus } from '@/app/menu';
+import { getMenuData } from './getMenuData';
+import prisma from '@/lib/prisma';
 
 export async function generateStaticParams() {
   const menus = await prisma.menu.findMany();
   return menus.map(menu => ({
     menu: menu.name,
   }));
-}
-
-async function getMenuData(menuName: string) {
-  const menu = await prisma.menu.findUnique({
-    where: { name: menuName },
-    include: { items: true },
-  });
-  return menu;
 }
 
 export default async function MenuPage({ params } : { params: any }) {
@@ -28,7 +21,7 @@ export default async function MenuPage({ params } : { params: any }) {
       <div className='ml-60'>
         <h1>{menu?.name}</h1>
         <ul>
-          {menu?.items.map((item) => (
+          {menu?.items.map((item: any) => (
             <li key={item.id}>
               <h2>{item.name}</h2>
               <p>Price: {item.price}</p>
