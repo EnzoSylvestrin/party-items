@@ -1,14 +1,6 @@
-import ToggleBar from '@/components/menu/ToogleBar';
-import { getMenus } from '@/app/menu';
+import ToggleBar from '@/components/menu/ToggleBar';
 import { getMenuData } from '../../../components/serverless/getMenuData';
-import prisma from '@/lib/prisma';
-
-export async function generateStaticParams() {
-  const menus = await prisma.menu.findMany();
-  return menus.map(menu => ({
-    menu: menu.name,
-  }));
-}
+import { getMenus } from '@/components/serverless/getMenus';
 
 export default async function MenuPage({ params } : { params: any }) {
   const menu = await getMenuData(params.menu);

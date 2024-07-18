@@ -1,4 +1,7 @@
+'use client';
+
 import { User } from '@prisma/client';
+
 import { createContext, useContext, useState } from 'react';
 
 interface AuthContextType {
@@ -13,6 +16,8 @@ export const AuthProvider = ({ children }: { children: any }) => {
   const [user, setUser] = useState(null);
 
   const login = (userData: any) => {
+    console.log(userData);
+
     setUser(userData);
   };
 

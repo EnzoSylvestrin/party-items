@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 
 import { useForm, FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,7 +9,7 @@ import { BiUser } from 'react-icons/bi';
 
 import { useAuth } from '../../context/AuthContext';
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 
@@ -28,12 +28,11 @@ const createUserSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Formato de cor inválido"),
   password: z.string().min(3, "A senha deve ter no mínimo 3 caracteres"),
-  isAdmin: z.boolean().optional(),
 });
-
 
 const UserModal = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const auth = useAuth();
   const login = auth?.login;
@@ -51,9 +50,18 @@ const UserModal = () => {
       try {
         const result = await Login({ name: data.name, password: data.password });
 
+        if (!result.success) {
+          Swal.fire('Erro', 'Usuário ou senha inválidos!', 'error');
+          return;
+        }
+
+        console.log(result)
+
         if (login) {
           login(result.user);
         }
+
+        setOpen(false);
 
         Swal.fire('Sucesso', 'Login realizado com sucesso!', 'success');
 
@@ -65,11 +73,15 @@ const UserModal = () => {
     }
     else {
       try {
-        const result = await SignUp({ name: data.name, password: data.password, color: data.color, isAdmin: data.isAdmin ?? false });
+        const result = await SignUp({ name: data.name, password: data.password, color: data.color });
+
+        console.log(result);
 
         if (login) {
           login(result);
         }
+
+        setOpen(false);
   
         Swal.fire('Sucesso', 'Usuário criado com sucesso!', 'success');
 
@@ -82,7 +94,7 @@ const UserModal = () => {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
       <DialogTrigger asChild>
         <div className='flex items-center justify-center h-12'>
           <Button className='p-3 rounded-full'>
@@ -93,44 +105,37 @@ const UserModal = () => {
       <DialogContent className='bg-bg text-text border-main border-2'>
         <DialogHeader>
           <DialogTitle className='mb-3'>{isLogin ? 'Entrar' : 'Criar Usuário'}</DialogTitle>
-          <DialogDescription>
-            <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-              <Input
-                placeholder='Nome'
-                {...register('name')}
-                className='p-2 border rounded'
+          <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+            <Input
+              placeholder='Nome'
+              {...register('name')}
+              className='p-2 border rounded'
+            />
+            {errors.name && <p className="text-red-500">{String(errors.name.message)}</p>}
+            <Input
+              type='password'
+              placeholder='Senha'
+              {...register('password')}
+              className='p-2 border rounded'
               />
-              {errors.name && <p className="text-red-500">{String(errors.name.message)}</p>}
-              {!isLogin && (
-                <Input
+            {errors.password && <p className="text-red-500">{String(errors.password.message)}</p>}
+            {!isLogin && (
+              <div className='flex items-center gap-3'>
+                <label htmlFor='color' className='text-text'>Cor do Nome:</label>
+                <input
+                  type='color'
                   placeholder='Cor do Nome (Hexadecimal)'
                   {...register('color')}
-                  className='p-2 border rounded'
+                  className='p-[2px] border rounded w-12'
                 />
-              )}
-              {!isLogin && errors.color && <p className="text-red-500">{String(errors.color.message)}</p>}
-              <Input
-                type='password'
-                placeholder='Senha'
-                {...register('password')}
-                className='p-2 border rounded'
-              />
-              {errors.password && <p className="text-red-500">{String(errors.password.message)}</p>}
-              {!isLogin && (
-                <label className='flex items-center gap-2'>
-                  <input
-                    type='checkbox'
-                    {...register('isAdmin')}
-                  />
-                  Administrador
-                </label>
-              )}
-              <a href="#" onClick={() => setIsLogin(!isLogin)} className="text-blue-500 text-center">
-                {isLogin ? 'Não tem conta ainda? Crie agora' : 'Já tem conta? Entre agora'}
-              </a>
-              <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
-            </form>
-          </DialogDescription>
+              </div>
+            )}
+            {!isLogin && errors.color && <p className="text-red-500">{String(errors.color.message)}</p>}
+            <a href="#" onClick={() => setIsLogin(!isLogin)} className="text-blue-500 text-center">
+              {isLogin ? 'Não tem conta ainda? Crie agora' : 'Já tem conta? Entre agora'}
+            </a>
+            <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
+          </form>
         </DialogHeader>
       </DialogContent>
     </Dialog>
