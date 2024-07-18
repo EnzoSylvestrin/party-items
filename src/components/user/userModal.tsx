@@ -1,30 +1,39 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+
+import { useForm, FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+
+import { BiUser } from 'react-icons/bi';
+
+import { useAuth } from '../../context/AuthContext';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { BiUser } from 'react-icons/bi';
+import { Input } from '../ui/input';
+
 import Swal from 'sweetalert2';
 
-import { FieldValues } from 'react-hook-form';
+import { z } from 'zod';
 
 const loginSchema = z.object({
-  name: z.string().min(1, "O nome é obrigatório!"),
-  password: z.string().min(3, "A senha precisa ter pelo menos 3 caracteres"),
+  name: z.string().min(1, "Name is required"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
 const createUserSchema = z.object({
-  name: z.string().min(1, "O nome é obrigatório!"),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, "A cor está num formato inválido"),
-  password: z.string().min(3, "A senha precisa ter pelo menos 3 caracteres"),
+  name: z.string().min(1, "Name is required"),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
   isAdmin: z.boolean().optional(),
 });
 
 const UserModal = () => {
   const [isLogin, setIsLogin] = useState(true);
+
+  const auth = useAuth();
+  const login = auth?.login;
 
   const {
     register,
@@ -34,7 +43,6 @@ const UserModal = () => {
     resolver: zodResolver(isLogin ? loginSchema : createUserSchema),
   });
 
-  
   const onSubmit = async (data: FieldValues) => {
     const url = isLogin ? '/api/users/login' : '/api/users';
     const response = await fetch(url, {
@@ -46,10 +54,13 @@ const UserModal = () => {
     });
     const result = await response.json();
     if (result.success) {
-        Swal.fire('Sucesso', isLogin ? 'Login realizado com sucesso!' : 'Usuário criado com sucesso!', 'success');
-          // handle successful response
+      Swal.fire('Sucesso', isLogin ? 'Login realizado com sucesso!' : 'Usuário criado com sucesso!', 'success');
+      if (login) {
+        login(result.user);
+      }
     } else {
-        Swal.fire('Erro', isLogin ? 'Ocorreu um erro ao fazer o login!' : 'Ocorreu um erro ao criar o usuário!', 'error');
+      Swal.fire('Erro', isLogin ? 'Ocorreu um erro ao fazer o login!' : 'Ocorreu um erro ao criar o usuário!', 'error');
+      console.log(result);
     }
   };
 
@@ -67,23 +78,21 @@ const UserModal = () => {
           <DialogTitle>{isLogin ? 'Entrar' : 'Criar Usuário'}</DialogTitle>
           <DialogDescription>
             <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
-              <input
-                type='text'
+              <Input
                 placeholder='Nome'
                 {...register('name')}
                 className='p-2 border rounded'
               />
               {errors.name && <p className="text-red-500">{String(errors.name.message)}</p>}
               {!isLogin && (
-                <input
-                  type='text'
+                <Input
                   placeholder='Cor do Nome (Hexadecimal)'
                   {...register('color')}
                   className='p-2 border rounded'
                 />
               )}
               {!isLogin && errors.color && <p className="text-red-500">{String(errors.color.message)}</p>}
-              <input
+              <Input
                 type='password'
                 placeholder='Senha'
                 {...register('password')}
@@ -99,10 +108,10 @@ const UserModal = () => {
                   Administrador
                 </label>
               )}
+              <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
               <a href="#" onClick={() => setIsLogin(!isLogin)} className="text-blue-500">
                 {isLogin ? 'Não tem conta ainda? Crie agora' : 'Já tem conta? Entre agora'}
               </a>
-              <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
             </form>
           </DialogDescription>
         </DialogHeader>
