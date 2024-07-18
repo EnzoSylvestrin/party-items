@@ -68,14 +68,14 @@ const UserModal = () => {
     <Dialog>
       <DialogTrigger asChild>
         <div className='flex items-center justify-center h-12'>
-          <Button className='bg-main hover:bg-main/80 transition-all duration-200 p-3 rounded-full'>
+          <Button className='p-3 rounded-full'>
             <BiUser size={16} />
           </Button>
         </div>
       </DialogTrigger>
-      <DialogContent className='bg-bg text-text'>
+      <DialogContent className='bg-bg text-text border-main border-2'>
         <DialogHeader>
-          <DialogTitle>{isLogin ? 'Entrar' : 'Criar Usuário'}</DialogTitle>
+          <DialogTitle className='mb-3'>{isLogin ? 'Entrar' : 'Criar Usuário'}</DialogTitle>
           <DialogDescription>
             <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
               <Input
@@ -108,10 +108,10 @@ const UserModal = () => {
                   Administrador
                 </label>
               )}
-              <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
-              <a href="#" onClick={() => setIsLogin(!isLogin)} className="text-blue-500">
+              <a href="#" onClick={() => setIsLogin(!isLogin)} className="text-blue-500 text-center">
                 {isLogin ? 'Não tem conta ainda? Crie agora' : 'Já tem conta? Entre agora'}
               </a>
+              <Button type="submit">{isLogin ? 'Login' : 'Criar Usuário'}</Button>
             </form>
           </DialogDescription>
         </DialogHeader>

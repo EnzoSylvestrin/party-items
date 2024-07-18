@@ -29,7 +29,7 @@ export default function NewMenus() {
                 placeholder="Novo Menu"
                 className="text-bg"
             />
-            <Button className="bg-main hover:bg-main/80 transition-all duration-200" onClick={handleAddMenu}>
+            <Button onClick={handleAddMenu}>
                 <FaPlus />
             </Button>
         </div>
