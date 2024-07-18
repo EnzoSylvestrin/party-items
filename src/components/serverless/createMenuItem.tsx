@@ -1,3 +1,5 @@
+'use server';
+
 import prisma from "@/lib/prisma";
 
 export async function createMenuItem(menuId: any, item: { name: any; quantity: any; price: any; }) {

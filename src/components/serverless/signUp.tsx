@@ -1,3 +1,5 @@
+'use server';
+
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
