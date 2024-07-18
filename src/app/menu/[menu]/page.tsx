@@ -1,6 +1,6 @@
-import ToggleBar from '@/components/ToogleBar';
+import ToggleBar from '@/components/menu/ToogleBar';
 import { getMenus } from '@/app/menu';
-import { getMenuData } from './getMenuData';
+import { getMenuData } from '../../../components/serverless/getMenuData';
 import prisma from '@/lib/prisma';
 
 export async function generateStaticParams() {

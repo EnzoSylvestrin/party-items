@@ -16,18 +16,21 @@ import { Input } from '../ui/input';
 import Swal from 'sweetalert2';
 
 import { z } from 'zod';
+import { Login } from '../serverless/login';
+import { SignUp } from '../serverless/signUp';
 
 const loginSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  password: z.string().min(3, "A senha deve ter no mínimo 3 caracteres"),
 });
 
 const createUserSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format"),
-  password: z.string().min(6, "Password must be at least 6 characters long"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Formato de cor inválido"),
+  password: z.string().min(3, "A senha deve ter no mínimo 3 caracteres"),
   isAdmin: z.boolean().optional(),
 });
+
 
 const UserModal = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -44,25 +47,39 @@ const UserModal = () => {
   });
 
   const onSubmit = async (data: FieldValues) => {
-    const url = isLogin ? '/api/users/login' : '/api/users';
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-    const result = await response.json();
-    if (result.success) {
-      Swal.fire('Sucesso', isLogin ? 'Login realizado com sucesso!' : 'Usuário criado com sucesso!', 'success');
-      if (login) {
-        login(result.user);
+    if (isLogin) {
+      try {
+        const result = await Login({ name: data.name, password: data.password });
+
+        if (login) {
+          login(result.user);
+        }
+
+        Swal.fire('Sucesso', 'Login realizado com sucesso!', 'success');
+
       }
-    } else {
-      Swal.fire('Erro', isLogin ? 'Ocorreu um erro ao fazer o login!' : 'Ocorreu um erro ao criar o usuário!', 'error');
-      console.log(result);
+      catch (e) {
+        Swal.fire('Erro', 'Ocorreu um erro ao fazer o login!', 'error');
+        console.log(e);
+      }
     }
-  };
+    else {
+      try {
+        const result = await SignUp({ name: data.name, password: data.password, color: data.color, isAdmin: data.isAdmin ?? false });
+
+        if (login) {
+          login(result);
+        }
+  
+        Swal.fire('Sucesso', 'Usuário criado com sucesso!', 'success');
+
+      }
+      catch (e) {
+        Swal.fire('Erro', 'Ocorreu um erro ao criar o usuário!', 'error');
+        console.log(e);
+      }
+    }
+  }
 
   return (
     <Dialog>

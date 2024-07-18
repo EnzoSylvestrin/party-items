@@ -1,4 +1,3 @@
-import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import prisma from '@/lib/prisma';
@@ -10,9 +9,7 @@ const userSchema = z.object({
   isAdmin: z.boolean().optional(),
 });
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
+export async function SignUp(body: { color: string, password: string, name: string, isAdmin?: boolean }) {
     const validatedData = userSchema.parse(body);
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
@@ -22,8 +19,5 @@ export async function POST(req: NextRequest) {
         password: hashedPassword, 
       },
     });
-    return NextResponse.json(user);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
+    return user;
 }

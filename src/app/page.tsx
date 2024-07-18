@@ -1,5 +1,5 @@
-import ToggleBar from '../components/ToogleBar';
-import { getMenus } from './getMenus';
+import ToggleBar from '../components/menu/ToogleBar';
+import { getMenus } from '../components/serverless/getMenus';
 
 export default async function Home() {
   const menus : any = await getMenus();

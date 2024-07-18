@@ -11,7 +11,7 @@ import { useIsMedium } from '@/hooks/useMediaQuery';
 import { DURATION_ANIMATION, ANIMATION_TYPE } from '@/utils/Constants';
 
 import NewMenus from './NewMenu';
-import UserModal from './user/userModal';
+import UserModal from '../user/userModal';
 
 export const ToggleBar = ({ menus }: { menus: Menu[] }) => {
   const IsMedium = useIsMedium();
