@@ -14,6 +14,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { z } from "zod";
 
+import { useRouter } from "next/navigation";
+
 const newMenuSchema = z.object({
     newMenuName: z.string().min(1, "Nome é obrigatório"),
 });
@@ -27,11 +29,13 @@ export default function NewMenus() {
         resolver: zodResolver(newMenuSchema),
     });
 
+    const router = useRouter();
+
     const handleAddMenu = async (data: FieldValues) => {
         try {
             await createMenu(data.newMenuName);
 
-            window.location.reload();
+            router.refresh();
         }
         catch (error: any) {
             Swal.fire('Erro', error.message, 'error');

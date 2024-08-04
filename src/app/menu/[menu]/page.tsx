@@ -1,6 +1,7 @@
 import ToggleBar from '@/components/menu/ToggleBar';
-import { getMenuData } from '../../../components/serverless/getMenuData';
 import { getMenus } from '@/components/serverless/getMenus';
+
+import { getMenuData } from '../../../components/serverless/getMenuData';
 
 export default async function MenuPage({ params } : { params: any }) {
   const menu = await getMenuData(params.menu);

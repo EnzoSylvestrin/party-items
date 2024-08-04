@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, useState } from 'react';
+import { useState } from 'react';
 
 import { useForm, FieldValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -41,6 +41,7 @@ const UserModal = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setError
   } = useForm({
     resolver: zodResolver(isLogin ? loginSchema : createUserSchema),
   });
@@ -51,7 +52,7 @@ const UserModal = () => {
         const result = await Login({ name: data.name, password: data.password });
 
         if (!result.success) {
-          Swal.fire('Erro', 'Usuário ou senha inválidos!', 'error');
+          setError('name', { message: 'Usuário ou senha inválidos' });
           return;
         }
 
@@ -75,10 +76,13 @@ const UserModal = () => {
       try {
         const result = await SignUp({ name: data.name, password: data.password, color: data.color });
 
-        console.log(result);
+        if (!result.success) {
+          setError('name', { message: 'Usuário já existe' });
+          return;
+        }
 
         if (login) {
-          login(result);
+          login(result.user);
         }
 
         setOpen(false);

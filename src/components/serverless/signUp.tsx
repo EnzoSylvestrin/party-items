@@ -15,11 +15,19 @@ export async function SignUp(body: { color: string, password: string, name: stri
     const validatedData = userSchema.parse(body);
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
+    const haveAnotherUserWithName = await prisma.user.count({
+      where: { name: validatedData.name },
+    })
+
+    if (haveAnotherUserWithName > 0) {
+      return { success: false, message: 'Name already is used' };
+    }
+
     const user = await prisma.user.create({
       data: { 
         ...validatedData,
         password: hashedPassword, 
       },
     });
-    return user;
+    return { success: true, user };
 }
