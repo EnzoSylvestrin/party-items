@@ -73,7 +73,7 @@ export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
       )}
     >
       <div className='p-4 flex flex-col gap-4'>
-        <NewMenus />
+        <NewMenus refresh={refresh} />
         <div
           className={clsx(
             "flex flex-col gap-5 w-full md:h-full",
