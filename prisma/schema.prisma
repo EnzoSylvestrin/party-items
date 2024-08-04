@@ -16,19 +16,30 @@ model User {
   isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Row       Row[]
 }
 
 model Menu {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  items Item[]
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  tables Table[]
 }
 
-model Item {
-  id       Int    @id @default(autoincrement())
-  name     String
-  quantity Int
-  price    Float
-  menuId   Int
-  menu     Menu   @relation(fields: [menuId], references: [id])
+model Table {
+  id      Int    @id @default(autoincrement())
+  name    String
+  columns Json
+  menuId  Int
+  menu    Menu   @relation(fields: [menuId], references: [id])
+  rows    Row[]
+}
+
+model Row {
+  id        Int      @id @default(autoincrement())
+  data      Json
+  tableId   Int
+  table     Table    @relation(fields: [tableId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }

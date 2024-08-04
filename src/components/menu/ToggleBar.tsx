@@ -1,7 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
 import { useAuth } from '@/context/AuthContext';
 
 import { Menu } from '@prisma/client';
@@ -24,23 +22,23 @@ import { deleteMenu } from '../serverless/deleteMenu';
 
 type ToggleBarProps = {
   menus: Menu[];
+  refresh: () => Promise<void>;
 }
 
-export const ToggleBar = ({ menus }: ToggleBarProps) => {
+export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
   const auth = useAuth();
   const user = auth?.user;
   const logout = auth?.logout;
 
   const isUserLogged = user != null;
 
-  const router = useRouter();
-
   const handleDeleteMenu = async (e: any, menuId: number) => {
     e.preventDefault();
 
     try {
       await deleteMenu(menuId);
-      router.refresh();
+      
+      refresh();
     }
     catch (error: any) {
       Swal.fire('Erro', error.message, 'error');
@@ -61,7 +59,6 @@ export const ToggleBar = ({ menus }: ToggleBarProps) => {
       if (result.isDenied) {
         if (logout) {
           logout();
-          router.push('/');
         }
       }
     })
