@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 export async function getMenuData(menuName: string) {
   const menu = await prisma.menu.findUnique({
     where: { name: menuName },
-    include: { items: true },
+    include: { tables: true },
   });
   return menu;
 }
