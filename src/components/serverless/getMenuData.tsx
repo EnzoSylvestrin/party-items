@@ -8,7 +8,11 @@ export async function getMenuData(menuId: string) {
     include: {
       Table: {
         include: {
-          rows: true,
+          rows: {
+            include: {
+              user: true
+            }
+          },
         },
       },
     },

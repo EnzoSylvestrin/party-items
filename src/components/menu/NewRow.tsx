@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 
 import { createNewRow } from "../serverless/createNewRow"
 
@@ -14,20 +14,19 @@ import { z } from "zod"
 
 import Swal from "sweetalert2"
 import { useAuth } from "@/context/AuthContext"
+import { TableDataType } from "@/app/menu/[menu]/page"
 
 type newColumnType = {
     open: boolean,
     setOpen: (open: boolean) => void,
     menuId: string,
-    handleAddLine: (newRow: {
-        [key: string]: string;
-    }) => void,
-    tableData: {
-        columns: Prisma.JsonValue | null;
-        rows: {
+    handleAddLine: ({ newRowData, newRowUser }: {
+        newRowData: {
             [key: string]: string;
-        }[];
-    }
+        };
+        newRowUser: User;
+    }) => void
+    tableData: TableDataType
 }
 
 export const NewRow = ({ open, setOpen, menuId, handleAddLine, tableData } : newColumnType) => {
@@ -56,16 +55,17 @@ export const NewRow = ({ open, setOpen, menuId, handleAddLine, tableData } : new
 
     const handleAddRow = async (data: FieldValues) => {
         try {
-            let userId = user?.id;
-
-            if (!userId) {
+            if (!user) {
                 Swal.fire('Atenção', 'Você precisa estar logado para adicionar uma linha', 'warning');
                 return;
             }
 
-            await createNewRow(menuId, userId, data);
+            await createNewRow(menuId, user.id, data);
 
-            handleAddLine(data as { [key: string]: string });
+            handleAddLine({
+                newRowData: data as { [key: string]: string },
+                newRowUser: user,
+            });
             setOpen(false);
         }
         catch (error) {

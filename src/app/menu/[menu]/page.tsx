@@ -17,12 +17,24 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 
 import { useAuth } from '@/context/AuthContext';
 
-import { Menu, Prisma } from '@prisma/client';
+import { Menu, Prisma, User } from '@prisma/client';
+
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+
+export type TableDataType = { 
+  columns: Prisma.JsonValue | null, 
+  rows: { 
+    data: { 
+      [key: string]: string 
+    },
+    user: User 
+  }[]
+}
 
 export default function MenuPage({ params }: { params: any }) {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [menu, setMenu] = useState<any | null>(null);
-  const [tableData, setTableData] = useState<{ columns: Prisma.JsonValue | null, rows: { [key: string]: string }[] }>({ columns: null, rows: [] });
+  const [tableData, setTableData] = useState<TableDataType>({ columns: null, rows: [] });
 
   const [openColumnDialog, setOpenColumnDialog] = useState(false);
   const [openRowDialog, setOpenRowDialog] = useState(false);
@@ -37,8 +49,6 @@ export default function MenuPage({ params }: { params: any }) {
     setMenus(menus);
   }
 
-  console.log(tableData);
-
   async function loadMenu(menuId: string) {
     const menu = await getMenuData(menuId);
 
@@ -51,7 +61,10 @@ export default function MenuPage({ params }: { params: any }) {
     if (menu && menu.Table) {
       setTableData({
         columns: menu.Table.columns,
-        rows: menu.Table.rows.map(row => row.data as { [key: string]: string }),
+        rows: menu.Table.rows.map(row => ({
+          data: row.data as { [key: string]: string },
+          user: row.user,
+        })),
       });
     }
   }
@@ -77,28 +90,33 @@ export default function MenuPage({ params }: { params: any }) {
     }));
   };
 
-  const handleAddRow = (newRow: { [key: string]: string }) => {
+  const handleAddRow = ({ newRowData, newRowUser } : { newRowData: { [key: string]: string }, newRowUser: User }) => {
     setTableData((prev) => ({
       ...prev,
-      rows: [...prev.rows, newRow],
+      rows: [...prev.rows, { data: newRowData, user: newRowUser }],
     }));
   };
 
   const validateUserisLogged = (errorMessage: string) => {
     if (!isUserLogged) {
       Swal.fire('Atenção', errorMessage, 'warning');
-      return;
+      return false;
     }
+    return true;
   }
 
   const handleOpenRowDialog = () => {
-    validateUserisLogged('Você precisa estar logado para adicionar uma linha.');
+    const shouldContinue = validateUserisLogged('Você precisa estar logado para adicionar uma linha.');
+
+    if (!shouldContinue) return;
 
     setOpenRowDialog(true);
   }
 
   const handleOpenColumnDialog = () => {
-    validateUserisLogged('Você precisa estar logado para adicionar uma coluna.');
+    const shouldContinue = validateUserisLogged('Você precisa estar logado para adicionar uma coluna.');
+
+    if (!shouldContinue) return;
 
     setOpenColumnDialog(true);
   }
@@ -121,16 +139,28 @@ export default function MenuPage({ params }: { params: any }) {
             </TableHeader>
             <TableBody>
               {tableData.rows.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
-                  {tableData.columns && Object.values(tableData.columns).map((column, colIndex) => (
-                    <TableCell key={colIndex}>{row[column]}</TableCell>
-                  ))}
-                  {(tableData.columns && Object.keys(tableData.columns).length < 6) && <TableCell></TableCell>}
-                </TableRow>
+                <HoverCard key={rowIndex}>
+                  <HoverCardTrigger asChild>
+                    <TableRow>
+                      {tableData.columns && Object.values(tableData.columns).map((column, colIndex) => (
+                        <TableCell key={colIndex}>{row.data[column]}</TableCell>
+                      ))}
+                      {(tableData.columns && Object.keys(tableData.columns).length < 6) && <TableCell></TableCell>}
+                    </TableRow>
+                  </HoverCardTrigger>
+                  <HoverCardContent className='w-80'>
+                    <div className='rounded-lg flex items-center justify-between'>
+                      <p className='text-sm'>Criado por: <span style={{ color: row.user.color }}>{row.user.name}</span></p>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
               ))}
-              <TableRow>
-                <TableCell colSpan={Object.keys(tableData.columns ?? {}).length + 1} className='cursor-pointer' onClick={handleOpenRowDialog}>+</TableCell>
-              </TableRow>
+              {
+                tableData.columns && Object.keys(tableData.columns).length > 0 &&
+                <TableRow>
+                  <TableCell colSpan={Object.keys(tableData.columns ?? {}).length + 1} className='cursor-pointer' onClick={handleOpenRowDialog}>+</TableCell>
+                </TableRow>
+              }
             </TableBody>
           </Table>
         </div>

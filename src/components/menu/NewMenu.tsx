@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from "react";
+
 import { FaPlus } from "react-icons/fa";
 
 import Swal from "sweetalert2";
@@ -13,6 +15,7 @@ import { FieldValues, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { z } from "zod";
+import { Loader2 } from "lucide-react";
 
 const newMenuSchema = z.object({
     newMenuName: z.string().min(1, "Nome é obrigatório"),
@@ -23,19 +26,29 @@ export default function NewMenus({ refresh }: { refresh: () => Promise<void> }) 
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
     } = useForm({
         resolver: zodResolver(newMenuSchema),
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+
     const handleAddMenu = async (data: FieldValues) => {
+        setIsLoading(true);
+
         try {
             await createMenu(data.newMenuName);
+
+            setValue('newMenuName', '');
 
             refresh();
         }
         catch (error: any) {
             Swal.fire('Erro', error.message, 'error');
             console.error(error);
+        }
+        finally {
+            setIsLoading(false);
         }
     };
 
@@ -48,8 +61,13 @@ export default function NewMenus({ refresh }: { refresh: () => Promise<void> }) 
                 {...register('newMenuName')}
             />
             {errors.password && <p className="text-red-500">{String(errors.password.message)}</p>}
-            <Button type="submit">
-                <FaPlus />
+            <Button type="submit" disabled={isLoading}>
+                {
+                    isLoading ? 
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    : 
+                    <FaPlus />
+                }
             </Button>
         </form>
     )
