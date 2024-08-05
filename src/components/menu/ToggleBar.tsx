@@ -82,7 +82,7 @@ export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
         >
           <div className='flex flex-col gap-2'>
             {menus.map((menu) => (
-              <Link href={`/menu/${menu.name}`} key={menu.id} className='p-2 rounded-lg hover:bg-main transition-all duration-300 relative'>
+              <Link href={`/menu/${menu.id}`} key={menu.id} className='p-2 rounded-lg hover:bg-main transition-all duration-300 relative'>
                 {menu.name}
                 {
                   user?.isAdmin && (

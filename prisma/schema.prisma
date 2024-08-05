@@ -20,17 +20,17 @@ model User {
 }
 
 model Menu {
-  id     Int     @id @default(autoincrement())
-  name   String  @unique
-  tables Table[]
+  id      Int    @id @default(autoincrement())
+  name    String
+  tableId Int?
+  Table   Table?
 }
 
 model Table {
-  id      Int    @id @default(autoincrement())
-  name    String
+  id      Int   @id @default(autoincrement())
   columns Json
-  menuId  Int
-  menu    Menu   @relation(fields: [menuId], references: [id])
+  menuId  Int   @unique
+  menu    Menu  @relation(fields: [menuId], references: [id], onDelete: Cascade)
   rows    Row[]
 }
 
@@ -38,8 +38,8 @@ model Row {
   id        Int      @id @default(autoincrement())
   data      Json
   tableId   Int
-  table     Table    @relation(fields: [tableId], references: [id])
+  table     Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }

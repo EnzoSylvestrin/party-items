@@ -11,9 +11,25 @@ export async function createMenu(name: string) {
         throw new Error('Já existe um menu com esse nome!');
     }
 
-    const menu = await prisma.menu.create({
-        data: { name },
+    const result = await prisma.$transaction(async (prisma) => {
+        const menu = await prisma.menu.create({
+            data: { name },
+        });
+
+        const table = await prisma.table.create({
+            data: {
+                menuId: menu.id,
+                columns: [],
+            },
+        });
+
+        await prisma.menu.update({
+            where: { id: menu.id },
+            data: { tableId: table.id },
+        });
+
+        return { menu, table };
     });
 
-    return menu;
+    return result.menu;
 }

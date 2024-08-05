@@ -56,8 +56,6 @@ const UserModal = () => {
           return;
         }
 
-        console.log(result)
-
         if (login) {
           login(result.user);
         }
