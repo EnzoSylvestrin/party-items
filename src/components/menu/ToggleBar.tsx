@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+
 import { useAuth } from '@/context/AuthContext';
 
 import { Menu } from '@prisma/client';
@@ -19,18 +21,26 @@ import { Button } from '../ui/button';
 import Swal from 'sweetalert2';
 
 import { deleteMenu } from '../serverless/deleteMenu';
+import { getMenus } from '../serverless/getMenus';
 
-type ToggleBarProps = {
-  menus: Menu[];
-  refresh: () => Promise<void>;
-}
+import { useRouter } from 'next/navigation';
 
-export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
+export const ToggleBar = () => {
+  const [menus, setMenus] = useState<Menu[]>([]);
+
   const auth = useAuth();
   const user = auth?.user;
   const logout = auth?.logout;
 
   const isUserLogged = user != null;
+
+  const router = useRouter();
+
+  async function loadMenus() {
+    let menus : any = await getMenus();
+
+    setMenus(menus);
+  }
 
   const handleDeleteMenu = async (e: any, menuId: number) => {
     e.preventDefault();
@@ -38,7 +48,9 @@ export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
     try {
       await deleteMenu(menuId);
       
-      refresh();
+      loadMenus();
+
+      router.push('/');
     }
     catch (error: any) {
       Swal.fire('Erro', error.message, 'error');
@@ -64,6 +76,10 @@ export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
     })
   }
 
+  useEffect(() => {
+    loadMenus();
+  }, []);
+
   return (
     <div
       className={clsx(
@@ -73,7 +89,7 @@ export const ToggleBar = ({ menus, refresh }: ToggleBarProps) => {
       )}
     >
       <div className='p-4 flex flex-col gap-4'>
-        <NewMenus refresh={refresh} />
+        <NewMenus refresh={loadMenus} />
         <div
           className={clsx(
             "flex flex-col gap-5 w-full md:h-full",
